@@ -16,7 +16,8 @@ belong in the ignored local files described in the Android and iPhone guides.
 A native Android port of KT2 Pose is in [`android/`](android/README.md), with
 phone-only robot controls, ARCore/ArUco tracking, the position filter/map, and an
 optional adb USB link to the existing desktop receiver. It targets Pixel 7 Pro
-on Android 13+, with a signed sideload APK and a tester kit. Start with the
+on Android 13+, with a signed sideload APK and a tester kit available in the
+[Android preview release](https://github.com/BenCaunt/kt2-nav/releases/tag/android-v0.1.0-preview). Start with the
 [installation and first-test guide](android/TESTER-START-HERE.md). Physical Pixel
 tracking and robot operation still need hardware verification; see the
 [validation record](android/VERIFICATION.md).
