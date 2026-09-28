@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KT2 · MuJoCo Lab</title>
+<style>
+:root{color-scheme:dark;--bg:#10151a;--panel:#181f26;--line:#2b3640;--text:#e7edf3;--muted:#93a6b7;--accent:#60dcc1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{display:flex;align-items:center;justify-content:space-between;padding:22px 30px;border-bottom:1px solid var(--line)}h1{font-size:19px;letter-spacing:.02em;margin:0}h1 span{font-weight:400;color:var(--muted);margin-left:14px}.badge{font:11px monospace;letter-spacing:.12em;color:var(--accent);border:1px solid #315b54;padding:7px 10px;border-radius:5px}.intro{padding:18px 30px;color:var(--muted);line-height:1.6}main{display:grid;grid-template-columns:minmax(400px,1.4fr) minmax(340px,1fr);gap:20px;padding:0 30px 30px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}.bar{padding:14px 17px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.label{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted)}.camera{position:relative;aspect-ratio:3/2;background:#1c2228}.camera img{width:100%;height:100%;object-fit:contain}.overlay{position:absolute;bottom:14px;left:16px;right:16px;display:flex;justify-content:space-between;font:11px monospace;color:#b5c5d0}.actions{padding:15px;display:flex;gap:7px;flex-wrap:wrap}button,select{font:inherit;background:#24303a;color:var(--text);border:1px solid #384854;border-radius:5px;padding:8px 12px;cursor:pointer}button:hover{border-color:var(--accent);color:var(--accent)}button:disabled{opacity:.4;cursor:default}.primary{background:var(--accent);color:#09271f;border-color:var(--accent);font-weight:600}.danger{color:#ffb7ac}.metrics{display:grid;grid-template-columns:repeat(3,1fr);padding:14px 17px;border-top:1px solid var(--line);gap:12px}.value{font:19px monospace;margin-top:7px}.unit{font:11px sans-serif;color:var(--muted)}textarea{width:100%;height:320px;resize:vertical;border:0;outline:none;background:#131a20;color:#caeee4;padding:18px;font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;tab-size:4}.editor-footer{padding:12px 16px;display:flex;gap:8px;border-top:1px solid var(--line);align-items:center}.hint{color:var(--muted);font-size:11px;line-height:1.6;padding:0 17px 14px}.log{height:160px;overflow:auto;margin:0;background:#11181d;padding:15px 17px;color:#bfd3e1;font:12px/1.6 monospace;white-space:pre-wrap}.joints{padding:17px;border-top:1px solid var(--line)}.joint{display:grid;grid-template-columns:86px 1fr 50px;gap:10px;align-items:center;margin:12px 0;font-size:12px}.joint output{text-align:right;font-family:monospace}input{accent-color:var(--accent);width:100%}.contact{color:var(--accent)}.offline{color:#ffb7ac}a{color:var(--accent)}footer{padding:0 30px 24px;color:var(--muted);font-size:12px}@media(max-width:900px){main{grid-template-columns:1fr;padding:0 16px 20px}header{padding:20px 16px}.intro{padding:16px}h1 span{display:block;margin:5px 0 0;font-size:13px}}
+.primary:hover{background:#83ead5;color:#09271f}
+.pose-controls{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}.pose-controls .joint{grid-template-columns:86px minmax(80px,1fr) 48px}.sequence-list{font:12px/1.6 monospace;max-height:150px;overflow:auto;padding-left:25px;color:var(--muted)}.hardware-controls input[type=number]{width:80px}.hardware-preview-column{position:sticky;top:16px;align-self:start}
+.hardware-preview:has(img[hidden]){aspect-ratio:auto;min-height:100px}
+.hardware{margin:0 30px 20px}.hardware-body{padding:16px;display:grid;grid-template-columns:1fr 300px;gap:20px}.hardware-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.hardware-controls input{width:150px;background:#11181d;color:var(--text);border:1px solid #384854;border-radius:5px;padding:8px;font:13px monospace}.hardware-values{font:13px/1.8 monospace;color:#c9ddd9;margin:14px 0}.hardware-preview{position:relative;aspect-ratio:3/2;background:#11181d;display:grid;place-items:center;border-radius:6px;overflow:hidden}.hardware-preview img{width:100%;height:100%;object-fit:contain}.hardware-preview [hidden]{display:none}.hardware-preview span{padding:20px;color:var(--muted);font-size:12px;text-align:center}.hardware .hint{padding:0;margin-top:12px}.hardware .error{color:#ffb7ac}@media(max-width:900px){.hardware{margin:0 16px 20px}.hardware-body{grid-template-columns:1fr}.hardware-preview{max-width:400px}}
+@media(min-width:641px) and (max-width:900px){.hardware-body{grid-template-columns:minmax(0,1fr) 250px}}
+</style></head><body>
+<header><h1>KT2 <span>MuJoCo Lab</span></h1><span class="badge">SIMULATION</span></header>
+<div class="intro">Write Python for your pocket robot. Four actuated joints, simulated IMU, and contact physics.<br>API calls follow the recovered firmware examples. Geometry and motion trajectories are approximate.</div>
+<section class="panel hardware"><div class="bar"><span class="label">Real robot · controls &amp; sensors</span><span id="hardware-status" class="label">Disconnected</span></div>
+<div class="hardware-body"><div><div class="hardware-controls"><label for="hardware-host">Robot IP</label><input id="hardware-host" value="192.168.4.1" placeholder="192.168.4.1" spellcheck="false"><button id="hardware-connect">Connect robot</button><button id="hardware-disconnect" disabled>Disconnect</button></div>
+<div class="hardware-controls" style="margin-top:14px"><button data-hardware-action="walk_forward" disabled>Robot: walk forward</button><button data-hardware-action="walk_back" disabled>Robot: walk back</button><button data-hardware-action="stand" disabled>Robot: stand</button><button id="hardware-stop" class="danger" disabled>Stop robot</button></div>
+<div class="hint">Robot walks run one native cycle, then stand. IMU readings update between motion frames.</div>
+<div id="hardware-motion" class="hint" role="status">No robot motion requested.</div>
+<div class="hardware-values" id="hardware-values">Roll / pitch / yaw: —<br>Acceleration: —<br>Gyroscope: —</div>
+<div id="hardware-message" class="hint">Connect this computer to the robot's Wi-Fi or enter its LAN IP. Connecting starts sensor readings; physical motion requires a robot button.</div>
+<div class="pose-controls"><span class="label">Real robot · joint control</span><div id="hardware-sliders"></div>
+<div class="hardware-controls"><label for="hardware-duration">Transition (s)</label><input id="hardware-duration" type="number" min="0.1" max="3" step="0.1" value="0.5"><button id="hardware-pose" class="primary" disabled>Apply robot pose</button><button id="hardware-add-frame">Add keyframe</button></div>
+<div id="hardware-pose-message" class="hint">Connect, then use Robot: stand to establish a commanded starting pose.</div>
+<ol id="hardware-sequence" class="sequence-list" aria-label="Robot keyframes"></ol>
+<div class="hardware-controls"><button id="hardware-run-sequence" disabled>Run robot sequence</button><button id="hardware-clear-sequence" disabled>Clear keyframes</button><span id="hardware-sequence-summary" class="hint" style="margin:0">0 / 32 frames · 0.0 / 15 s</span></div>
+<div id="hardware-pose-error" class="hint error" role="alert"></div>
+<div class="hint">Sliders set targets; Apply sends them to the real robot. Sequence frames run once and hold the final pose. Software limits: ±90°, 0.1–3 s per frame, 15 s total. These are not measured mechanical limits.</div></div>
+<div class="hint">The preview assumes IMU angles are degrees. Raw units and axes still need verification. Close other robot log readers while connected.</div></div>
+<div class="hardware-preview-column"><div class="hardware-preview"><img id="hardware-camera" alt="KT2 body orientation from real IMU, with commanded or illustrative joint angles" hidden><span id="hardware-placeholder">Waiting for real IMU telemetry</span></div><div class="hint" id="hardware-preview-caption">Live IMU orientation · leg angles unknown</div><div class="hint">Leg angles show the last completed command when known, not encoder readings. Body position and LED color are illustrative. This view is separate from simulated physics.</div></div></div></section>
+<main><section class="panel"><div class="bar"><span class="label">Simulator · physics view</span><span id="connection" class="label">Connecting…</span></div>
+<div class="camera"><img id="camera" alt="Live MuJoCo rendering of the four-legged KT2 robot"><div class="overlay"><span id="clock">t = 0.00 s</span><span>MUJOCO · 500 Hz physics</span></div></div>
+<div class="actions"><button data-action="stand">Sim: stand</button><button data-action="walk">Sim: walk forward</button><button data-action="back">Sim: walk back</button><button data-action="seesaw">Sim: seesaw</button><button data-action="shake">Sim: shake hand</button><button id="reset">Reset scene</button></div>
+<div class="metrics"><div><span class="label">Distance from origin</span><div class="value"><span id="distance">0.0</span> <span class="unit">cm</span></div></div><div><span class="label">Pitch</span><div class="value"><span id="pitch">0.0</span><span class="unit">°</span></div></div><div><span class="label">Feet on ground</span><div class="value contact" id="contacts">4 / 4</div></div></div>
+<div class="joints"><span class="label">Joint targets · degrees</span><div id="sliders"></div><button id="pose">Apply pose</button><div class="hint" style="padding:12px 0 0">Joint order: front left, front right, rear left, rear right. Live angle readings appear beside each control.</div></div>
+</section><section class="panel"><div class="bar"><span class="label">Python console</span><select id="examples" aria-label="Example program"><option value="walk">Walk + sensors</option><option value="pose">Custom pose</option><option value="led">LED + motion</option></select></div>
+<textarea id="code" aria-label="Robot Python program" spellcheck="false"></textarea>
+<div class="editor-footer"><button id="run" class="primary">Run Python</button><button id="stop" class="danger">Stop</button><span id="program" class="label" style="margin-left:auto">Idle</span></div>
+<div class="hint">⌘ / Ctrl + Enter to run. Programs execute as trusted local Python on this computer. This console and the Sim buttons control the simulator. Use the Robot buttons above for physical motion.</div>
+<div class="bar"><span class="label">Output</span><button id="clear" style="font-size:11px;padding:4px 9px">Clear</button></div><pre id="log" class="log">Ready. Choose a motion or run a Python program.
+</pre><div class="bar"><span class="label">API endpoint</span><code id="endpoint"></code></div>
+<div class="hint" style="padding-top:15px">POST <code>/py</code> with a form field named <code>code</code>. Read output from <code>/log</code> and physics state from <code>/sim/state</code>. LED calls change the model; buzzer calls produce log events.</div>
+</section></main><footer>KT2 simulation v0.1 · Original approximate gaits · No firmware modification</footer>
+<script>
+const $=id=>document.getElementById(id), programs={
+walk:`from actions import walk, stand\nimport imu\n\nq.play(stand(q))\nq.play(walk(q), 3)\nq.play(stand(q))\nsleep(0.3)\n\nprint("Roll:", imu.get_r())\nprint("Pitch:", imu.get_p())\nprint("Acceleration (g):", imu.get_az())`,
+pose:`# Four angles, followed by duration in seconds\nq.play(q.frame(-55, -55, 85, 85, 0.5))\nsleep(0.5)\nq.play(q.f(0, 0, 0, 0, 0.5,\n    ofs=[-75, -75, 75, 75]))`,
+led:`import actions\n\nled.on(0x60a5fa)\nq.play(actions.seesaw(q), 2)\nled.on(0x2dd4bf)\nq.play(actions.shake_hand(q))\nq.play(actions.stand(q))\nprint("Done")`};
+$('code').value=programs.walk;$('endpoint').textContent=location.origin;
+const names=['Front left','Front right','Rear left','Rear right'];
+names.forEach((name,i)=>{const row=document.createElement('div');row.className='joint';row.innerHTML=`<label for="j${i}">${name}</label><input id="j${i}" type="range" min="-145" max="145" value="${i<2?-75:75}" aria-label="${name} target"><output id="a${i}">—</output>`;$('sliders').append(row);});
+names.forEach((name,i)=>{const row=document.createElement('div');row.className='joint';row.innerHTML=`<label for="hj${i}">${name}</label><input id="hj${i}" type="range" min="-90" max="90" value="${i<2?-75:75}" aria-label="Robot ${name.toLowerCase()} target"><output id="ha${i}">${i<2?-75:75}°</output>`;$('hardware-sliders').append(row);$('hj'+i).oninput=()=>{$('ha'+i).textContent=$('hj'+i).value+'°';};});
+function log(s){$('log').textContent+=s;$('log').textContent=$('log').textContent.slice(-15000);$('log').scrollTop=$('log').scrollHeight;}
+async function post(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(body||{})});const data=await r.json();if(!r.ok||data.status==='NG')throw Error(data.msg||`HTTP ${r.status}`);return data;}
+$('hardware-connect').onclick=async()=>{
+  $('hardware-connect').disabled=true;
+  try{await post('/hardware/connect',{host:$('hardware-host').value});}
+  catch(e){$('hardware-message').textContent=e.message;$('hardware-message').className='hint error';$('hardware-connect').disabled=false;}
+};
+$('hardware-disconnect').onclick=()=>post('/hardware/disconnect').catch(e=>log(e.message+'\n'));
+let hardwareSubmitting=false,hardwareCanPose=false,hardwareFrames=[];
+function poseButtons(){
+  $('hardware-pose').disabled=!hardwareCanPose||hardwareSubmitting;
+  $('hardware-run-sequence').disabled=!hardwareCanPose||hardwareSubmitting||!hardwareFrames.length;
+  $('hardware-clear-sequence').disabled=!hardwareFrames.length;
+}
+function poseFrame(){
+  const frame=[...names.map((_,i)=>Number($('hj'+i).value)),Number($('hardware-duration').value)];
+  if(!frame.every(Number.isFinite)||frame[4]<0.1||frame[4]>3)throw Error('Choose a transition from 0.1 to 3 seconds.');
+  return frame;
+}
+function renderSequence(){
+  $('hardware-sequence').replaceChildren(...hardwareFrames.map(f=>{const li=document.createElement('li');li.textContent=f.slice(0,4).map(v=>v+'°').join(' / ')+' → '+f[4]+' s';return li;}));
+  $('hardware-sequence-summary').textContent=`${hardwareFrames.length} / 32 frames · ${hardwareFrames.reduce((n,f)=>n+f[4],0).toFixed(1)} / 15 s`;
+  poseButtons();
+}
+$('hardware-pose').onclick=()=>{try{$('hardware-pose-error').textContent='';robotCommand('/hardware/pose',{frames:JSON.stringify([poseFrame()])});}catch(e){$('hardware-pose-error').textContent=e.message;}};
+$('hardware-add-frame').onclick=()=>{
+  try{const frame=poseFrame();if(hardwareFrames.length>=32||hardwareFrames.reduce((n,f)=>n+f[4],0)+frame[4]>15)throw Error('Sequence limit: 32 frames and 15 seconds.');hardwareFrames.push(frame);$('hardware-pose-error').textContent='';renderSequence();}
+  catch(e){$('hardware-pose-error').textContent=e.message;}
+};
+$('hardware-clear-sequence').onclick=()=>{hardwareFrames=[];$('hardware-pose-error').textContent='';renderSequence();};
+$('hardware-run-sequence').onclick=()=>robotCommand('/hardware/pose',{frames:JSON.stringify(hardwareFrames)});
+async function robotCommand(path,body){
+  hardwareSubmitting=true;
+  poseButtons();
+  document.querySelectorAll('[data-hardware-action]').forEach(b=>b.disabled=true);
+  $('hardware-motion').textContent=path==='/hardware/stop'?'Sending Stop to robot…':'Requesting robot motion…';
+  try{await post(path,body);}
+  catch(e){$('hardware-motion').textContent=e.message;$('hardware-pose-error').textContent=e.message;log('Robot: '+e.message+'\n');}
+  finally{hardwareSubmitting=false;}
+}
+document.querySelectorAll('[data-hardware-action]').forEach(b=>b.onclick=()=>robotCommand('/hardware/action',{action:b.dataset.hardwareAction}));
+$('hardware-stop').onclick=()=>robotCommand('/hardware/stop');
+async function hardwarePoll(){
+  try{
+    const r=await fetch('/hardware/state');
+    if(!r.ok)throw Error(`Hardware API: HTTP ${r.status}`);
+    const s=await r.json(),active=['connecting','streaming','stale','moving','stopping'].includes(s.status);
+    $('hardware-connect').disabled=active;
+    $('hardware-disconnect').disabled=!active;
+    $('hardware-host').disabled=active;
+    document.querySelectorAll('[data-hardware-action]').forEach(b=>b.disabled=!s.can_move||hardwareSubmitting);
+    $('hardware-stop').disabled=!s.can_stop;
+    hardwareCanPose=!!s.can_pose;poseButtons();
+    const targets=s.joint_targets_deg;
+    $('hardware-pose-message').textContent=targets?`Last commanded LF / RF / LR / RR: ${targets.map(v=>v.toFixed(1)+'°').join(' / ')}`:'Use Robot: stand to establish a commanded starting pose before applying joint targets.';
+    $('hardware-preview-caption').textContent=targets?'Live IMU orientation · commanded joint angles':'Live IMU orientation · illustrative legs (targets unknown)';
+    if(!hardwareSubmitting){
+      const motion=s.motion,labels={queued:'Queued · waiting for the sensor reader to finish',submitting:'Sending motion to robot',running:'Robot motion running',completed:'Robot reported motion complete',failed:'Robot motion failed',cancelled:'Robot motion cancelled',unconfirmed:'Motion result unconfirmed; command was not retried',stopping:'Sending Stop to robot',stop_acknowledged:'Robot acknowledged Stop. Connect robot to resume.',stop_unconfirmed:'Stop was not confirmed'};
+      $('hardware-motion').textContent=motion?`${motion.action.replaceAll('_',' ')} · ${labels[motion.status]||motion.status}${motion.error?' · '+motion.error:''}`:'No robot motion requested.';
+    }
+    $('hardware-status').textContent=s.status+(s.fresh?` · ${s.samples} samples`:'');
+    $('hardware-status').className=s.fresh?'label contact':'label';
+    const values=s.telemetry?.values||{},triple=names=>names.map(n=>typeof values[n]==='number'?values[n].toFixed(2):'—').join(' / ');
+    $('hardware-values').textContent=`Roll / pitch / yaw: ${triple(['get_r','get_p','get_y'])}\nAcceleration: ${triple(['get_ax','get_ay','get_az'])}\nGyroscope: ${triple(['get_gx','get_gy','get_gz'])}`;
+    $('hardware-values').style.whiteSpace='pre-line';
+    const messages={connecting:'Checking KT2 identity and starting a sensor reader…',streaming:`Receiving real IMU data · sample age ${s.age_seconds?.toFixed(2)} s · raw firmware units`,moving:s.fresh?`Motion running · IMU updates between frames · sample age ${s.age_seconds?.toFixed(2)} s`:'Motion running · waiting for fresh IMU data; preview hidden.',stopping:'Cancelling queued motion and sending the robot’s stop request…',stopped:'Robot acknowledged Stop. Reconnect to resume sensors and motion controls.',stale:'Telemetry is stale. The orientation preview is hidden until fresh data arrives.',disconnected:'Connect to the robot’s Wi-Fi or enter its LAN IP. Idle sensor bursts finish within about one second of disconnecting.'};
+    const errorMessage=s.error?.startsWith('URLError:')?`Cannot reach the KT2 at ${s.host}. Connect this computer to the robot's Wi-Fi, or enter its current LAN IP.`:s.error;
+    $('hardware-message').textContent=errorMessage||messages[s.status]||s.status;
+    $('hardware-message').className=s.error?'hint error':'hint';
+    let displayed=false;
+    if(s.orientation_deg_assumed){
+      const frame=await fetch('/hardware/frame.jpg');
+      if(frame.ok){
+        const u=URL.createObjectURL(await frame.blob()),old=$('hardware-camera').src;
+        $('hardware-camera').src=u;
+        if(old.startsWith('blob:'))URL.revokeObjectURL(old);
+        displayed=true;
+      }
+    }
+    $('hardware-camera').hidden=!displayed;
+    $('hardware-placeholder').hidden=displayed;
+    $('hardware-placeholder').textContent=s.status==='stale'?'IMU data is stale':'Waiting for real IMU telemetry';
+  }catch(e){
+    $('hardware-status').textContent='Unavailable';
+    $('hardware-message').textContent=e.message;
+    $('hardware-camera').hidden=true;
+    $('hardware-placeholder').hidden=false;
+    hardwareCanPose=false;poseButtons();
+    document.querySelectorAll('[data-hardware-action]').forEach(b=>b.disabled=true);
+  }
+  setTimeout(hardwarePoll,100);
+}
+hardwarePoll();
+async function execute(code){try{await post('/py',{code});}catch(e){log(`Error: ${e.message}\n`);}}
+$('run').onclick=()=>execute($('code').value);$('stop').onclick=()=>post('/api',{p:'/py/vm/break'}).catch(e=>log(e.message+'\n'));
+$('reset').onclick=()=>post('/sim/reset').catch(e=>log(e.message+'\n'));$('clear').onclick=()=>{$('log').textContent='';};
+$('examples').onchange=()=>{$('code').value=programs[$('examples').value];};
+$('pose').onclick=()=>execute(`q.play(q.f(${names.map((_,i)=>$('j'+i).value).join(', ')}, 0.5))`);
+const moves={stand:'q.play(actions.stand(q))',walk:'q.play(actions.walk(q), 3)\nq.play(actions.stand(q))',back:'q.play(actions.walk(q, x=-1), 3)\nq.play(actions.stand(q))',seesaw:'q.play(actions.seesaw(q), 2)',shake:'q.play(actions.shake_hand(q))'};
+document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>execute('import actions\n'+moves[b.dataset.action]));
+$('code').onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();$('run').click();}if(e.key==='Tab'){e.preventDefault();const a=e.target.selectionStart,z=e.target.selectionEnd;e.target.setRangeText('    ',a,z,'end');}};
+let imageBusy=false;
+async function poll(){
+  try{
+    const s=await(await fetch('/sim/state')).json();
+    $('connection').textContent='Connected · local';
+    $('connection').className='label';
+    $('clock').textContent=`t = ${s.time.toFixed(2)} s`;
+    $('distance').textContent=(100*Math.hypot(...s.position.slice(0,2))).toFixed(1);
+    $('pitch').textContent=s.rpy_deg[1].toFixed(1);
+    $('contacts').textContent=Object.values(s.feet_contact).filter(Boolean).length+' / 4';
+    const stopped=s.last_error==='SimulationStopped: Program stopped';
+    $('program').textContent=s.busy?'Running':stopped?'Stopped':s.last_error?'Error':'Idle';
+    $('run').disabled=s.busy;
+    document.querySelectorAll('[data-action],#reset,#pose').forEach(b=>b.disabled=s.busy);
+    names.forEach((_,i)=>$('a'+i).textContent=s.angles_deg[i].toFixed(1)+'°');
+    const output=await(await fetch('/log')).text();
+    if(output)log(output);
+    if(!imageBusy){
+      imageBusy=true;
+      const r=await fetch('/sim/frame.jpg');
+      if(r.ok){
+        const u=URL.createObjectURL(await r.blob()),old=$('camera').src;
+        $('camera').src=u;
+        if(old.startsWith('blob:'))URL.revokeObjectURL(old);
+      }
+      imageBusy=false;
+    }
+  }catch(e){
+    imageBusy=false;
+    $('connection').textContent='Disconnected';
+    $('connection').className='label offline';
+  }
+  setTimeout(poll,100);
+}
+poll();
+</script></body></html>

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kt2-sim"
+version = "0.1.0"
+description = "MuJoCo simulator for the recovered KT2 Python and HTTP interfaces"
+requires-python = ">=3.11"
+dependencies = ["mujoco>=3.3,<4", "numpy>=2,<3", "pillow>=10", "imageio>=2.35", "imageio-ffmpeg>=0.5"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+tracking = ["aiohttp>=3.12,<4"]
+
+[project.scripts]
+kt2-sim = "kt2_sim.__main__:main"
+kt2-track = "kt2_tracking.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["kt2_sim*", "kt2_tracking*"]
+
+[tool.setuptools.package-data]
+kt2_sim = ["models/*.xml", "web/*.html"]
+kt2_tracking = ["web/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

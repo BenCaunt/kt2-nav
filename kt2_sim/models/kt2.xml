@@ -1,0 +1,86 @@
+<mujoco model="KT2 approximate four-servo robot">
+  <compiler angle="degree" autolimits="true"/>
+  <option timestep="0.002" integrator="implicitfast" cone="elliptic" iterations="60"/>
+  <visual>
+    <global offwidth="1280" offheight="720"/>
+    <quality shadowsize="2048"/>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3"/>
+    <map znear="0.005"/>
+  </visual>
+  <statistic center="0 0 0.04" extent="0.35"/>
+  <default>
+    <joint damping="0.0018" armature="0.000006" frictionloss="0.0005"/>
+    <geom friction="0.85 0.005 0.0001" condim="4" solref="0.006 1" solimp="0.95 0.99 0.001"/>
+    <default class="visual">
+      <geom contype="0" conaffinity="0" mass="0"/>
+    </default>
+    <default class="leg">
+      <joint type="hinge" axis="0 -1 0" range="-150 150"/>
+      <geom type="capsule" size="0.0037" rgba="0.09 0.105 0.12 1"/>
+    </default>
+  </default>
+  <asset>
+    <texture name="ground" type="2d" builtin="checker" width="512" height="512" rgb1="0.16 0.19 0.22" rgb2="0.19 0.22 0.25"/>
+    <material name="floor" texture="ground" texrepeat="20 20" reflectance="0.08"/>
+    <material name="shell" rgba="0.13 0.15 0.18 1" specular="0.65" shininess="0.6"/>
+    <material name="trim" rgba="0.55 0.62 0.67 1" specular="0.8" shininess="0.6"/>
+    <material name="rubber" rgba="0.055 0.065 0.075 1"/>
+  </asset>
+  <worldbody>
+    <light pos="0.3 -0.3 0.6" dir="-0.4 0.4 -1" diffuse="0.8 0.85 0.9"/>
+    <light pos="-0.3 0.3 0.4" dir="0.3 -0.3 -1" diffuse="0.4 0.55 0.65" castshadow="false"/>
+    <geom name="floor" type="plane" size="3 3 0.05" material="floor"/>
+    <body name="shell" pos="0 0 0.052">
+      <freejoint name="root"/>
+      <inertial pos="-0.004 0 0.004" mass="0.12" diaginertia="0.000038 0.000062 0.000086"/>
+      <geom name="chassis" type="box" size="0.034 0.025 0.012" material="shell"/>
+      <geom name="top" class="visual" type="box" pos="0 0 0.013" size="0.030 0.024 0.0025" material="shell"/>
+      <geom name="nose" class="visual" type="box" pos="0.032 0 0.007" size="0.0025 0.024 0.005" material="trim"/>
+      <geom name="usb" class="visual" type="box" pos="-0.0345 0 0.003" size="0.0006 0.0045 0.0018" rgba="0.015 0.02 0.025 1"/>
+      <geom name="led_left" class="visual" type="box" pos="0 0.0255 -0.005" size="0.025 0.001 0.002" rgba="0.15 0.8 0.7 1"/>
+      <geom name="led_right" class="visual" type="box" pos="0 -0.0255 -0.005" size="0.025 0.001 0.002" rgba="0.15 0.8 0.7 1"/>
+      <geom name="led_front" class="visual" type="box" pos="0.035 0 -0.005" size="0.001 0.022 0.002" rgba="0.15 0.8 0.7 1"/>
+      <site name="imu" size="0.001" rgba="0 0 0 0"/>
+      <camera name="follow" mode="trackcom" pos="0.22 -0.28 0.17" xyaxes="0.786 0.618 0 -0.236 0.300 0.924"/>
+      <body name="front_left" pos="0.028 0.03 0" childclass="leg">
+        <joint name="front_left"/>
+        <inertial pos="0.021 0.003 0" mass="0.01" diaginertia="0.00000015 0.0000018 0.0000018"/>
+        <geom name="front_left_link" fromto="0 0 0 0.045 0.006 0"/>
+        <geom class="visual" type="cylinder" size="0.007 0.003" quat="0.7071 0.7071 0 0" material="trim"/>
+        <geom name="front_left_foot" type="sphere" size="0.0048" pos="0.045 0.006 0" material="rubber"/>
+      </body>
+      <body name="front_right" pos="0.028 -0.03 0" childclass="leg">
+        <joint name="front_right"/>
+        <inertial pos="0.021 -0.003 0" mass="0.01" diaginertia="0.00000015 0.0000018 0.0000018"/>
+        <geom name="front_right_link" fromto="0 0 0 0.045 -0.006 0"/>
+        <geom class="visual" type="cylinder" size="0.007 0.003" quat="0.7071 0.7071 0 0" material="trim"/>
+        <geom name="front_right_foot" type="sphere" size="0.0048" pos="0.045 -0.006 0" material="rubber"/>
+      </body>
+      <body name="rear_left" pos="-0.028 0.03 0" childclass="leg">
+        <joint name="rear_left"/>
+        <inertial pos="-0.021 0.003 0" mass="0.01" diaginertia="0.00000015 0.0000018 0.0000018"/>
+        <geom name="rear_left_link" fromto="0 0 0 -0.045 0.006 0"/>
+        <geom class="visual" type="cylinder" size="0.007 0.003" quat="0.7071 0.7071 0 0" material="trim"/>
+        <geom name="rear_left_foot" type="sphere" size="0.0048" pos="-0.045 0.006 0" material="rubber"/>
+      </body>
+      <body name="rear_right" pos="-0.028 -0.03 0" childclass="leg">
+        <joint name="rear_right"/>
+        <inertial pos="-0.021 -0.003 0" mass="0.01" diaginertia="0.00000015 0.0000018 0.0000018"/>
+        <geom name="rear_right_link" fromto="0 0 0 -0.045 -0.006 0"/>
+        <geom class="visual" type="cylinder" size="0.007 0.003" quat="0.7071 0.7071 0 0" material="trim"/>
+        <geom name="rear_right_foot" type="sphere" size="0.0048" pos="-0.045 -0.006 0" material="rubber"/>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <position name="front_left" joint="front_left" kp="0.35" kv="0.012" ctrlrange="-2.617994 2.617994" forcerange="-0.12 0.12"/>
+    <position name="front_right" joint="front_right" kp="0.35" kv="0.012" ctrlrange="-2.617994 2.617994" forcerange="-0.12 0.12"/>
+    <position name="rear_left" joint="rear_left" kp="0.35" kv="0.012" ctrlrange="-2.617994 2.617994" forcerange="-0.12 0.12"/>
+    <position name="rear_right" joint="rear_right" kp="0.35" kv="0.012" ctrlrange="-2.617994 2.617994" forcerange="-0.12 0.12"/>
+  </actuator>
+  <sensor>
+    <accelerometer name="accelerometer" site="imu"/>
+    <gyro name="gyro" site="imu"/>
+    <framequat name="orientation" objtype="site" objname="imu"/>
+  </sensor>
+</mujoco>
